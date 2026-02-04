@@ -69,7 +69,7 @@ pub fn create_router(state: AppState) -> Router {
         .route("/voice/api/voices", get(voice::handle_voice_list))
         .route("/resume/api/generate", post(resume::handle_resume_generate))
         .route("/bot/api/create", post(bot::handle_bot_create))
-        .route("/bot/api/chat/:bot_id", post(bot::handle_bot_chat));
+        .route("/bot/api/chat/{bot_id}", post(bot::handle_bot_chat));
 
     // 3. Construct Final Router
     Router::new()
