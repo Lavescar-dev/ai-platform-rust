@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Image Generator - Nexus AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f0f23; color: #e0e0e0; min-height: 100vh; }
+        .nav { padding: 16px 24px; border-bottom: 1px solid #1a1a2e; display: flex; align-items: center; gap: 8px; }
+        .nav a { color: #00d9ff; text-decoration: none; font-size: 14px; }
+        .nav span { color: #666; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        h1 { color: #00d9ff; margin-bottom: 24px; font-size: 28px; }
+        textarea { width: 100%; background: #1a1a2e; border: 1px solid #333; color: #e0e0e0; padding: 12px; border-radius: 6px; font-size: 14px; resize: vertical; min-height: 80px; font-family: inherit; }
+        textarea:focus { outline: none; border-color: #00d9ff; }
+        .btn { background: #00d9ff; color: #0f0f23; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 16px; }
+        .btn:hover { background: #00b8d4; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .output { margin-top: 24px; background: #1a1a2e; border-radius: 8px; padding: 24px; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .output img { max-width: 100%; border-radius: 4px; }
+        .placeholder { color: #666; font-style: italic; }
+        .error { color: #ff4444; margin-top: 12px; }
+        .spinner { display: none; width: 32px; height: 32px; border: 3px solid #333; border-top-color: #00d9ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">Nexus AI</a><span>/</span><span>Image Generator</span>
+    </div>
+    <div class="container">
+        <h1>Image Generator</h1>
+        <textarea id="prompt" placeholder="Describe the image you want to generate..."></textarea>
+        <button class="btn" id="generateBtn" onclick="generateImage()">Generate Image</button>
+        <div class="error" id="error"></div>
+        <div class="output" id="output">
+            <span class="placeholder" id="placeholder">Generated image will appear here</span>
+            <div class="spinner" id="spinner"></div>
+            <img id="result" style="display:none" alt="Generated image">
+        </div>
+    </div>
+    <div style="position:fixed;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;z-index:9999;pointer-events:none;">DEMO | lavescar.com.tr</div>
+    <script>
+    async function generateImage() {
+        const prompt = document.getElementById('prompt').value.trim();
+        if (!prompt) return;
+        const btn = document.getElementById('generateBtn');
+        const spinner = document.getElementById('spinner');
+        const result = document.getElementById('result');
+        const placeholder = document.getElementById('placeholder');
+        const error = document.getElementById('error');
+        btn.disabled = true; error.textContent = '';
+        placeholder.style.display = 'none'; result.style.display = 'none'; spinner.style.display = 'block';
+        try {
+            const res = await fetch('/image/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Request failed'); }
+            const data = await res.json();
+            result.src = data.image; result.style.display = 'block';
+        } catch (e) { error.textContent = 'Error: ' + e.message; placeholder.style.display = 'block'; }
+        finally { btn.disabled = false; spinner.style.display = 'none'; }
+    }
+    </script>
+
+    <script defer src="https://lavescar.com.tr/static/bridge.js"></script>
+
+</body>
+</html>

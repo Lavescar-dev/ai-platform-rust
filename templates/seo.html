@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>SEO Analyzer - Nexus AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .nav {
+            padding: 16px 24px;
+            border-bottom: 1px solid #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .nav a { color: #00d9ff; text-decoration: none; transition: opacity 0.2s; }
+        .nav a:hover { opacity: 0.8; }
+        .nav .sep { color: #444; }
+        .nav .current { color: #e0e0e0; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+        .page-title { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .page-desc { color: #8888aa; font-size: 15px; margin-bottom: 32px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        textarea, select {
+            width: 100%;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #e0e0e0;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        textarea:focus, select:focus { border-color: #00d9ff; }
+        textarea::placeholder { color: #555; }
+        textarea { resize: vertical; min-height: 140px; }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d9ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        select option { background: #1a1a2e; color: #e0e0e0; }
+        .btn {
+            background: #00d9ff;
+            color: #0f0f23;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover { background: #00c4e6; }
+        .btn:disabled { background: #2a2a4a; color: #555; cursor: not-allowed; }
+        .results-section { margin-top: 32px; display: none; }
+        .results-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .score-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .score-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .score-card .score-value {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .score-card .score-label {
+            font-size: 12px;
+            color: #8888aa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .score-good { color: #00d9ff; }
+        .score-ok { color: #ffc107; }
+        .score-bad { color: #ff6b6b; }
+        .progress-bar-container {
+            background: #0a0a1a;
+            border-radius: 6px;
+            height: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.6s ease;
+        }
+        .section-block {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .section-block h3 {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .keyword-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .keyword-tag {
+            background: #00d9ff15;
+            border: 1px solid #00d9ff33;
+            color: #00d9ff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        .keyword-tag .count {
+            color: #8888aa;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+        .recommendation {
+            padding: 10px 0;
+            border-bottom: 1px solid #2a2a4a;
+            font-size: 14px;
+            line-height: 1.6;
+            display: flex;
+            gap: 10px;
+        }
+        .recommendation:last-child { border-bottom: none; }
+        .rec-icon { flex-shrink: 0; margin-top: 2px; }
+        .rec-pass { color: #4caf50; }
+        .rec-warn { color: #ffc107; }
+        .rec-fail { color: #ff6b6b; }
+        .raw-output {
+            background: #0a0a1a;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 16px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: "SF Mono", "Fira Code", monospace;
+            display: none;
+        }
+        .toggle-raw {
+            background: transparent;
+            border: 1px solid #2a2a4a;
+            color: #8888aa;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+        .toggle-raw:hover { border-color: #00d9ff; color: #00d9ff; }
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #2a2a4a;
+            border-top: 2px solid #00d9ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-msg {
+            background: #3d1a1a;
+            border: 1px solid #5a2a2a;
+            color: #ff6b6b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        @media (max-width: 600px) {
+            .score-cards { grid-template-columns: 1fr 1fr; }
+            .container { padding: 24px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">Nexus AI</a>
+        <span class="sep">&rsaquo;</span>
+        <span class="current">SEO Analyzer</span>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">SEO Analyzer</h1>
+        <p class="page-desc">Analyze content for SEO performance, keywords, readability, and technical issues.</p>
+
+        <div class="form-group">
+            <label>Content or URL</label>
+            <textarea id="content" placeholder="Paste your content or enter a URL to analyze..."></textarea>
+        </div>
+
+        <div class="form-group" style="max-width:300px;">
+            <label>Analysis Type</label>
+            <select id="analysisType">
+                <option value="full">Full Analysis</option>
+                <option value="keywords">Keywords</option>
+                <option value="readability">Readability</option>
+                <option value="technical">Technical</option>
+                <option value="content">Content</option>
+            </select>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;">
+            <button class="btn" id="analyzeBtn" onclick="analyze()">Analyze</button>
+            <div class="spinner" id="spinner"></div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-title">Analysis Results</div>
+
+            <div class="score-cards" id="scoreCards"></div>
+
+            <div id="keywordsBlock" class="section-block" style="display:none;">
+                <h3>Keywords</h3>
+                <div class="keyword-list" id="keywordsList"></div>
+            </div>
+
+            <div id="recommendationsBlock" class="section-block" style="display:none;">
+                <h3>Recommendations</h3>
+                <div id="recommendationsList"></div>
+            </div>
+
+            <button class="toggle-raw" onclick="toggleRaw()">Show Raw Response</button>
+            <div class="raw-output" id="rawOutput"></div>
+        </div>
+        <div id="errorArea"></div>
+    </div>
+
+    <div style="position:fixed;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;z-index:9999;pointer-events:none;">DEMO | lavescar.com.tr</div>
+
+    <script>
+        function getScoreClass(score) {
+            if (score >= 70) return 'score-good';
+            if (score >= 40) return 'score-ok';
+            return 'score-bad';
+        }
+
+        function getScoreColor(score) {
+            if (score >= 70) return '#00d9ff';
+            if (score >= 40) return '#ffc107';
+            return '#ff6b6b';
+        }
+
+        function toggleRaw() {
+            const el = document.getElementById('rawOutput');
+            const btn = document.querySelector('.toggle-raw');
+            if (el.style.display === 'none') {
+                el.style.display = 'block';
+                btn.textContent = 'Hide Raw Response';
+            } else {
+                el.style.display = 'none';
+                btn.textContent = 'Show Raw Response';
+            }
+        }
+
+        function renderResults(data) {
+            const scoreCards = document.getElementById('scoreCards');
+            const keywordsBlock = document.getElementById('keywordsBlock');
+            const keywordsList = document.getElementById('keywordsList');
+            const recommendationsBlock = document.getElementById('recommendationsBlock');
+            const recommendationsList = document.getElementById('recommendationsList');
+            const rawOutput = document.getElementById('rawOutput');
+
+            scoreCards.innerHTML = '';
+            keywordsList.innerHTML = '';
+            recommendationsList.innerHTML = '';
+            rawOutput.textContent = JSON.stringify(data, null, 2);
+
+            // Render scores
+            const scores = data.scores || data;
+            const scoreFields = [
+                { key: 'overall', label: 'Overall' },
+                { key: 'seo_score', label: 'SEO' },
+                { key: 'readability', label: 'Readability' },
+                { key: 'keyword_score', label: 'Keywords' },
+                { key: 'technical', label: 'Technical' },
+                { key: 'content_quality', label: 'Content' }
+            ];
+
+            for (const f of scoreFields) {
+                const val = scores[f.key];
+                if (val !== undefined && val !== null) {
+                    const num = typeof val === 'number' ? val : parseInt(val);
+                    if (isNaN(num)) continue;
+                    const cls = getScoreClass(num);
+                    const color = getScoreColor(num);
+                    scoreCards.innerHTML +=
+                        '<div class="score-card">' +
+                            '<div class="score-value ' + cls + '">' + num + '</div>' +
+                            '<div class="score-label">' + f.label + '</div>' +
+                            '<div class="progress-bar-container">' +
+                                '<div class="progress-bar-fill" style="width:' + num + '%;background:' + color + ';"></div>' +
+                            '</div>' +
+                        '</div>';
+                }
+            }
+
+            // Render keywords
+            const keywords = data.keywords || data.keyword_analysis || [];
+            if (keywords.length > 0) {
+                keywordsBlock.style.display = 'block';
+                for (const kw of keywords) {
+                    const word = typeof kw === 'string' ? kw : (kw.keyword || kw.word || kw.term);
+                    const count = typeof kw === 'object' ? (kw.count || kw.frequency || '') : '';
+                    keywordsList.innerHTML +=
+                        '<span class="keyword-tag">' + word +
+                        (count ? '<span class="count">(' + count + ')</span>' : '') +
+                        '</span>';
+                }
+            }
+
+            // Render recommendations
+            const recs = data.recommendations || data.suggestions || [];
+            if (recs.length > 0) {
+                recommendationsBlock.style.display = 'block';
+                for (const rec of recs) {
+                    const text = typeof rec === 'string' ? rec : (rec.message || rec.text || rec.recommendation);
+                    const status = typeof rec === 'object' ? (rec.status || rec.type || 'info') : 'info';
+                    let iconClass = 'rec-warn';
+                    let icon = '&#x26A0;';
+                    if (status === 'pass' || status === 'good' || status === 'success') {
+                        iconClass = 'rec-pass'; icon = '&#x2714;';
+                    } else if (status === 'fail' || status === 'error' || status === 'critical') {
+                        iconClass = 'rec-fail'; icon = '&#x2718;';
+                    }
+                    recommendationsList.innerHTML +=
+                        '<div class="recommendation">' +
+                            '<span class="rec-icon ' + iconClass + '">' + icon + '</span>' +
+                            '<span>' + text + '</span>' +
+                        '</div>';
+                }
+            }
+        }
+
+        async function analyze() {
+            const content = document.getElementById('content').value.trim();
+            if (!content) return;
+
+            const btn = document.getElementById('analyzeBtn');
+            const spinner = document.getElementById('spinner');
+            const resultsSection = document.getElementById('resultsSection');
+            const errorArea = document.getElementById('errorArea');
+
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            errorArea.innerHTML = '';
+
+            // Reset
+            document.getElementById('keywordsBlock').style.display = 'none';
+            document.getElementById('recommendationsBlock').style.display = 'none';
+            document.getElementById('rawOutput').style.display = 'none';
+
+            try {
+                const response = await fetch('/seo/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        analysis_type: document.getElementById('analysisType').value
+                    })
+                });
+
+                if (response.status === 429) {
+                    throw new Error('Rate limit exceeded. Please wait before making another request.');
+                }
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Request failed');
+                }
+
+                const data = await response.json();
+                resultsSection.style.display = 'block';
+                renderResults(data);
+
+            } catch (err) {
+                errorArea.innerHTML = '<div class="error-msg">' + err.message + '</div>';
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        }
+    </script>
+
+    <script defer src="https://lavescar.com.tr/static/bridge.js"></script>
+
+</body>
+</html>

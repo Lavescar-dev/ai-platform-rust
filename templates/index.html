@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Nexus AI - AI-Powered Tools Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.15);
+            padding: 60px 20px 50px;
+            text-align: center;
+        }
+        .header-logo {
+            font-size: 48px;
+            font-weight: 800;
+            color: #00d9ff;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+        .header-logo span {
+            color: #e0e0e0;
+            font-weight: 300;
+        }
+        .header-tagline {
+            font-size: 18px;
+            color: #8888aa;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .header-bar {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00d9ff, transparent);
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+        .section-title {
+            font-size: 14px;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            padding-left: 4px;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .tool-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 28px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d9ff, #0090ff);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: left;
+        }
+        .tool-card:hover {
+            background: #1e2240;
+            border-color: #00d9ff;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 217, 255, 0.1);
+        }
+        .tool-card:hover::before {
+            transform: scaleX(1);
+        }
+        .tool-icon {
+            font-size: 36px;
+            margin-bottom: 14px;
+            display: block;
+        }
+        .tool-card h3 {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .tool-card p {
+            font-size: 14px;
+            color: #8888aa;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #555;
+            font-size: 13px;
+            border-top: 1px solid #1a1a2e;
+        }
+        @media (max-width: 600px) {
+            .header { padding: 40px 20px 30px; }
+            .header-logo { font-size: 32px; }
+            .header-tagline { font-size: 14px; }
+            .tools-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-logo">Nexus <span>AI</span></div>
+        <div class="header-tagline">AI-Powered Tools Platform</div>
+        <div class="header-bar"></div>
+    </div>
+
+    <div class="container">
+        <div class="section-title">Available Tools</div>
+        <div class="tools-grid">
+            <a href="/chat" class="tool-card">
+                <span class="tool-icon">&#x1F4AC;</span>
+                <h3>AI Chat</h3>
+                <p>Conversational AI assistant powered by GPT. Ask questions, get instant answers.</p>
+            </a>
+            <a href="/content" class="tool-card">
+                <span class="tool-icon">&#x270D;</span>
+                <h3>Content Generator</h3>
+                <p>Create engaging content for any platform with customizable tone and style.</p>
+            </a>
+            <a href="/code" class="tool-card">
+                <span class="tool-icon">&#x1F4BB;</span>
+                <h3>Code Generator</h3>
+                <p>Generate, optimize, debug, and explain code in multiple languages.</p>
+            </a>
+            <a href="/email" class="tool-card">
+                <span class="tool-icon">&#x2709;</span>
+                <h3>Email Generator</h3>
+                <p>Craft professional emails for business, marketing, outreach, and more.</p>
+            </a>
+            <a href="/video" class="tool-card">
+                <span class="tool-icon">&#x1F3AC;</span>
+                <h3>Video Script Generator</h3>
+                <p>Write compelling video scripts for YouTube, TikTok, tutorials, and reviews.</p>
+            </a>
+            <a href="/seo" class="tool-card">
+                <span class="tool-icon">&#x1F4CA;</span>
+                <h3>SEO Analyzer</h3>
+                <p>Analyze content for SEO performance, keywords, readability, and technical issues.</p>
+            </a>
+            <a href="/image" class="tool-card">
+                <span class="tool-icon">&#x1F5BC;</span>
+                <h3>Image Generator</h3>
+                <p>Create AI-generated images from text descriptions using SDXL.</p>
+            </a>
+            <a href="/voice" class="tool-card">
+                <span class="tool-icon">&#x1F50A;</span>
+                <h3>Text-to-Speech</h3>
+                <p>Convert text to natural-sounding speech with multiple voices and speeds.</p>
+            </a>
+            <a href="/resume" class="tool-card">
+                <span class="tool-icon">&#x1F4C4;</span>
+                <h3>Resume Builder</h3>
+                <p>Generate polished, professional resumes from your experience and skills.</p>
+            </a>
+            <a href="/bot" class="tool-card">
+                <span class="tool-icon">&#x1F916;</span>
+                <h3>Bot Builder</h3>
+                <p>Create custom AI chatbots with unique personas and behaviors.</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">DEMO | lavescar.com.tr</div>
+    <div style="position:fixed;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;z-index:9999;pointer-events:none;">DEMO | lavescar.com.tr</div>
+
+    <script defer src="https://lavescar.com.tr/static/bridge.js"></script>
+
+</body>
+</html>

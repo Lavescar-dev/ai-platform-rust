@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Resume Builder - Nexus AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f0f23; color: #e0e0e0; min-height: 100vh; }
+        .nav { padding: 16px 24px; border-bottom: 1px solid #1a1a2e; display: flex; align-items: center; gap: 8px; }
+        .nav a { color: #00d9ff; text-decoration: none; font-size: 14px; }
+        .nav span { color: #666; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { color: #00d9ff; margin-bottom: 24px; font-size: 28px; }
+        label { display: block; margin-bottom: 6px; color: #999; font-size: 13px; }
+        input, textarea { width: 100%; background: #1a1a2e; border: 1px solid #333; color: #e0e0e0; padding: 12px; border-radius: 6px; font-size: 14px; font-family: inherit; }
+        textarea { resize: vertical; min-height: 80px; }
+        input:focus, textarea:focus { outline: none; border-color: #00d9ff; }
+        .form-group { margin-bottom: 16px; }
+        .btn { background: #00d9ff; color: #0f0f23; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 8px; }
+        .btn:hover { background: #00b8d4; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .output { margin-top: 24px; background: #1a1a2e; border-radius: 8px; padding: 24px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; min-height: 200px; }
+        .error { color: #ff4444; margin-top: 12px; }
+        .spinner { display: none; width: 24px; height: 24px; border: 3px solid #333; border-top-color: #00d9ff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 12px 0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">Nexus AI</a><span>/</span><span>Resume Builder</span>
+    </div>
+    <div class="container">
+        <h1>Resume Builder</h1>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="e.g., John Smith">
+        </div>
+        <div class="form-group">
+            <label>Experience</label>
+            <textarea id="experience" placeholder="Describe your work experience..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Skills (comma-separated)</label>
+            <textarea id="skills" placeholder="e.g., JavaScript, React, Node.js, Python, SQL, Docker"></textarea>
+        </div>
+        <button class="btn" id="generateBtn" onclick="generate()">Generate Resume</button>
+        <div class="error" id="error"></div>
+        <div class="spinner" id="spinner"></div>
+        <div class="output" id="output"></div>
+    </div>
+    <div style="position:fixed;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;z-index:9999;pointer-events:none;">DEMO | lavescar.com.tr</div>
+    <script>
+    async function generate() {
+        const name = document.getElementById('name').value.trim();
+        const experience = document.getElementById('experience').value.trim();
+        const skills = document.getElementById('skills').value.trim();
+        if (!name) return;
+        const btn = document.getElementById('generateBtn');
+        const spinner = document.getElementById('spinner');
+        const output = document.getElementById('output');
+        const error = document.getElementById('error');
+        btn.disabled = true; error.textContent = ''; output.textContent = ''; spinner.style.display = 'block';
+        try {
+            const res = await fetch('/resume/api/generate', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, experience, skills })
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Request failed'); }
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const text = decoder.decode(value);
+                for (const line of text.split('\n')) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '{}') continue;
+                        output.textContent += data;
+                    }
+                }
+            }
+        } catch(e) { error.textContent = 'Error: ' + e.message; }
+        finally { btn.disabled = false; spinner.style.display = 'none'; }
+    }
+    </script>
+
+    <script defer src="https://lavescar.com.tr/static/bridge.js"></script>
+
+</body>
+</html>

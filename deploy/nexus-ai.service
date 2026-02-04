@@ -1,0 +1,38 @@
+[Unit]
+Description=Nexus AI - AI Platform Demo
+Documentation=https://lavescar.com.tr
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/nexus-ai
+ExecStart=/opt/nexus-ai/nexus_ai
+Restart=on-failure
+RestartSec=5
+
+# Environment variables
+Environment="DEMO_MODE=true"
+Environment="OPENAI_API_KEY="
+Environment="HF_API_TOKEN="
+Environment="PORT=8080"
+Environment="DOMAIN=nexus.lavescar.com.tr"
+
+# Resource limits
+MemoryLimit=64M
+CPUQuota=25%
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log/nexus-ai
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nexus-ai
+
+[Install]
+WantedBy=multi-user.target
