@@ -3,7 +3,7 @@ use axum::{
     response::sse::{Event, KeepAlive, Sse},
     Json,
 };
-use futures_util::{Stream, StreamExt};
+use futures::Stream;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{convert::Infallible, net::SocketAddr};
@@ -89,20 +89,9 @@ pub async fn handle_bot_chat(
 
     state.rate_limiter.increment_counters(&ip, tool);
 
-    let stream = if state.is_demo() {
-        // Demo: Sahte asenkron akış
-        mock::mock_bot_stream(&persona, &req.message).boxed()
-    } else {
-        // Real: Doğrudan API stream'ine bağlan (Zero-latency pipe)
-        state.ai_client
-            .stream_chat(&persona, &req.message)
-            .await
-            .map_err(|e| AppError::InternalError(e.to_string()))?
-            .map(|token| Ok(Event::default().data(token)))
-            .boxed()
-    };
+    // Demo-only stream for stable deterministic behavior.
+    let stream = mock::mock_bot_stream(&persona, &req.message);
 
     Ok(Sse::new(stream)
-        .keep_alive(KeepAlive::default())
-        .header("X-Accel-Buffering", "no")) // Nginx stream bypass
+        .keep_alive(KeepAlive::default()))
 }

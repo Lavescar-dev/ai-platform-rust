@@ -1,10 +1,9 @@
-use ax_sse::{Event, Sse};
 use axum::{
     extract::{ConnectInfo, State},
-    response::sse::KeepAlive,
+    response::sse::{Event, KeepAlive, Sse},
     Json,
 };
-use futures_util::{Stream, StreamExt};
+use futures::Stream;
 use serde::Deserialize;
 use std::{convert::Infallible, net::SocketAddr};
 
@@ -41,27 +40,10 @@ pub async fn handle_content_generate(
     state.rate_limiter.increment_counters(&ip, tool); //
 
     // 3. Optimized Stream Logic
-    let stream = if state.is_demo() {
-        // Demo Mode: Mock asenkron akış
-        mock::mock_content_stream(&req.platform, &req.tone, prompt).boxed()
-    } else {
-        // Real Mode: OpenAI'dan gelen stream'i doğrudan pipe et (Zero-copy)
-        let system_prompt = format!(
-            "Generate content for {} platform with {} tone. Be concise and engaging.",
-            req.platform, req.tone
-        );
-
-        state.ai_client
-            .stream_chat(&system_prompt, prompt)
-            .await
-            .map_err(|e| AppError::InternalError(e.to_string()))? //
-            .map(|token| Ok(Event::default().data(token)))
-            .boxed()
-    };
+    // Demo-only stream for stable deterministic behavior.
+    let stream = mock::mock_content_stream(&req.platform, &req.tone, prompt);
 
     // 4. Optimized SSE Response
     Ok(Sse::new(stream)
-        .keep_alive(KeepAlive::default())
-        // Nginx'in veriyi tamponlamasını (buffering) engelleyerek anında iletimi sağlar
-        .header("X-Accel-Buffering", "no")) //
+        .keep_alive(KeepAlive::default())) //
 }

@@ -25,12 +25,16 @@ use crate::state::AppState;
 async fn demo_header_middleware(state: axum::extract::State<AppState>, req: Request, next: Next) -> Response {
     let mut response = next.run(req).await;
     
-    // Hardcoded 'true' yerine gerçek config durumunu yansıtıyoruz.
-    let mode = if state.config.demo_mode { "true" } else { "false" };
-    
+    // Hardcoded yerine gerçek config durumunu yansıtıyoruz.
+    let mode = if state.config.demo_mode {
+        HeaderValue::from_static("true")
+    } else {
+        HeaderValue::from_static("false")
+    };
+
     response.headers_mut().insert(
         "X-Demo-Mode",
-        HeaderValue::from_static(mode),
+        mode,
     );
     response
 }

@@ -1,10 +1,9 @@
-use ax_sse::{Event, Sse};
 use axum::{
     extract::{ConnectInfo, State},
-    response::sse::KeepAlive,
+    response::sse::{Event, KeepAlive, Sse},
     Json,
 };
-use futures_util::{Stream, StreamExt};
+use futures::Stream;
 use serde::Deserialize;
 use std::{convert::Infallible, net::SocketAddr};
 
@@ -41,27 +40,10 @@ pub async fn handle_code_generate(
     state.rate_limiter.increment_counters(&ip, tool);
 
     // 3. Unified Stream Logic
-    let stream = if state.is_demo() {
-        // Demo Mode: Mock stream using pre-defined buffers
-        mock::mock_code_stream(&req.language, description).boxed()
-    } else {
-        // Real Mode: Direct pipe from OpenAI to Client (Zero-copy)
-        let mode = req.mode.as_deref().unwrap_or("generate");
-        let system_prompt = format!(
-            "You are an expert {} programmer. Mode: {}. Output ONLY code, minimal comments.",
-            req.language, mode
-        );
-
-        state.ai_client
-            .stream_chat(&system_prompt, description)
-            .await
-            .map_err(|e| AppError::InternalError(e.to_string()))?
-            .map(|token| Ok(Event::default().data(token)))
-            .boxed()
-    };
+    // Demo-only stream for stable deterministic behavior.
+    let stream = mock::mock_code_stream(&req.language, description);
 
     // 4. Optimized SSE Response
     Ok(Sse::new(stream)
-        .keep_alive(KeepAlive::default())
-        .header("X-Accel-Buffering", "no")) // Bypass Nginx proxy buffering
+        .keep_alive(KeepAlive::default())) // Bypass Nginx proxy buffering
 }

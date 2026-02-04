@@ -2234,3 +2234,91 @@ What would be most helpful for you right now?",
         }
     }
 }
+
+fn stream_from_text(
+    text: String,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    let chunks: Vec<String> = text
+        .split_whitespace()
+        .map(|w| format!("{w} "))
+        .collect();
+
+    Box::pin(futures::stream::iter(
+        chunks
+            .into_iter()
+            .map(|chunk| Ok(axum::response::sse::Event::default().data(chunk))),
+    ))
+}
+
+pub fn mock_chat_stream(
+    message: &str,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    stream_from_text(mock_chat_response(message))
+}
+
+pub fn mock_content_stream(
+    platform: &str,
+    tone: &str,
+    prompt: &str,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    stream_from_text(mock_content(platform, tone, prompt))
+}
+
+pub fn mock_code_stream(
+    language: &str,
+    description: &str,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    stream_from_text(mock_code(language, description))
+}
+
+pub fn mock_email_stream(
+    email_type: &str,
+    subject: &str,
+    tone: &str,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    stream_from_text(mock_email(email_type, subject, tone))
+}
+
+pub fn mock_resume_stream(
+    name: &str,
+    experience: &str,
+    skills: &str,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    stream_from_text(mock_resume(name, experience, skills))
+}
+
+pub fn mock_bot_stream(
+    persona: &str,
+    message: &str,
+) -> futures::stream::BoxStream<
+    'static,
+    Result<axum::response::sse::Event, std::convert::Infallible>,
+> {
+    stream_from_text(mock_bot_response(persona, message))
+}
+
+pub fn mock_image_bytes() -> Vec<u8> {
+    let data_url = mock_image_base64();
+    let b64 = data_url.split(',').nth(1).unwrap_or(data_url.as_str());
+    base64::engine::general_purpose::STANDARD
+        .decode(b64)
+        .unwrap_or_default()
+}

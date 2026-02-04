@@ -1,4 +1,5 @@
 use dashmap::DashMap;
+use serde_json::json;
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -20,7 +21,7 @@ pub struct RateLimiter {
 }
 
 impl RateLimiter {
-    pub fn new(config: &crate::config::Settings) -> Self {
+    pub fn new(config: &crate::config::RateLimitConfig) -> Self {
         Self {
             daily_limits: Arc::new(DashMap::new()),
             tool_daily_limits: Arc::new(DashMap::new()),
@@ -142,5 +143,47 @@ impl RateLimiter {
             let ban_until = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() + self.error_ban_duration_secs;
             self.banned_ips.insert(ip, ban_until);
         }
+    }
+
+    pub fn get_remaining(&self, ip_str: &str, tool: &str) -> serde_json::Value {
+        let ip = Self::parse_ip(ip_str);
+        let tid = Self::get_tool_id(tool);
+        let day = Self::get_day_bucket();
+        let min = Self::get_min_bucket();
+
+        let global_used = self
+            .daily_limits
+            .get(&Self::generate_key(ip, 0, day))
+            .map(|v| *v)
+            .unwrap_or(0);
+        let tool_daily_used = self
+            .tool_daily_limits
+            .get(&Self::generate_key(ip, tid, day))
+            .map(|v| *v)
+            .unwrap_or(0);
+        let tool_minute_used = self
+            .tool_minute_limits
+            .get(&Self::generate_key(ip, tid, min))
+            .map(|v| *v)
+            .unwrap_or(0);
+
+        json!({
+            "global_daily": {
+                "used": global_used,
+                "limit": self.global_daily_limit,
+                "remaining": self.global_daily_limit.saturating_sub(global_used),
+            },
+            "tool_daily": {
+                "used": tool_daily_used,
+                "limit": self.tool_daily_limit,
+                "remaining": self.tool_daily_limit.saturating_sub(tool_daily_used),
+            },
+            "tool_minute": {
+                "used": tool_minute_used,
+                "limit": self.tool_minute_limit,
+                "remaining": self.tool_minute_limit.saturating_sub(tool_minute_used),
+            },
+            "banned": self.is_ip_banned(ip_str),
+        })
     }
 }

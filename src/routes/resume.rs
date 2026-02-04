@@ -1,10 +1,9 @@
-use ax_sse::{Event, Sse};
 use axum::{
     extract::{ConnectInfo, State},
-    response::sse::KeepAlive,
+    response::sse::{Event, KeepAlive, Sse},
     Json,
 };
-use futures_util::{Stream, StreamExt};
+use futures::Stream;
 use serde::Deserialize;
 use std::{convert::Infallible, net::SocketAddr};
 
@@ -39,24 +38,10 @@ pub async fn handle_resume_generate(
     state.rate_limiter.increment_counters(&ip, tool);
 
     // 2. Stream Generation
-    let stream = if state.is_demo() {
-        // Demo modu: Mock veriyi asenkron akışa çevir
-        mock::mock_resume_stream(&req.name, &req.experience, &req.skills).boxed()
-    } else {
-        // Real Mode: OpenAI'dan gelen stream'i doğrudan map et (Zero-copy)
-        let prompt = format!("Name: {}\nExp: {}\nSkills: {}", req.name, req.experience, req.skills);
-        
-        state.ai_client
-            .stream_chat("You are a professional resume writer. Output Markdown.", &prompt)
-            .await
-            .map_err(|e| AppError::InternalError(e.to_string()))?
-            .map(|token| Ok(Event::default().data(token)))
-            .boxed()
-    };
+    // Demo-only stream for stable deterministic behavior.
+    let stream = mock::mock_resume_stream(&req.name, &req.experience, &req.skills);
 
     // 3. Optimized SSE Response
     Ok(Sse::new(stream)
-        .keep_alive(KeepAlive::default())
-        // Nginx'in stream'i tamponlamasını (buffering) engellemek için kritik header
-        .header("X-Accel-Buffering", "no"))
+        .keep_alive(KeepAlive::default()))
 }

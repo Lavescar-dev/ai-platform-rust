@@ -14,22 +14,7 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(config: Config, rate_limit_config: RateLimitConfig) -> Self {
-        let daily_limits = Arc::new(DashMap::new());
-        let tool_daily_limits = Arc::new(DashMap::new());
-        let tool_minute_limits = Arc::new(DashMap::new());
-        let banned_ips = Arc::new(DashMap::new());
-
-        let rate_limiter = RateLimiter::new(
-            daily_limits,
-            tool_daily_limits,
-            tool_minute_limits,
-            banned_ips,
-            rate_limit_config.global_daily_limit,
-            rate_limit_config.tool_daily_limit,
-            rate_limit_config.tool_minute_limit,
-            rate_limit_config.error_ban_threshold,
-            rate_limit_config.error_ban_duration_secs,
-        );
+        let rate_limiter = RateLimiter::new(&rate_limit_config);
 
         Self {
             config,

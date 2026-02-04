@@ -1,10 +1,9 @@
-use ax_sse::{Event, Sse};
 use axum::{
     extract::{ConnectInfo, State},
-    response::sse::KeepAlive,
+    response::sse::{Event, KeepAlive, Sse},
     Json,
 };
-use futures_util::{Stream, StreamExt};
+use futures::Stream;
 use serde::Deserialize;
 use std::{convert::Infallible, net::SocketAddr};
 
@@ -39,24 +38,10 @@ pub async fn handle_chat_stream(
     state.rate_limiter.increment_counters(&ip, tool);
 
     // 3. Unified Stream Logic
-    let stream = if state.is_demo() {
-        // Demo Mode: Mock asenkron akış
-        mock::mock_chat_stream(message).boxed()
-    } else {
-        // Real Mode: Zero-latency pipe from OpenAI to Client
-        let system_prompt = "You are Nexus AI, a helpful assistant.";
-
-        state.ai_client
-            .stream_chat(system_prompt, message)
-            .await
-            .map_err(|e| AppError::InternalError(e.to_string()))?
-            .map(|token| Ok(Event::default().data(token)))
-            .boxed()
-    };
+    // Demo-only stream for stable deterministic behavior.
+    let stream = mock::mock_chat_stream(message);
 
     // 4. Optimized SSE Response
     Ok(Sse::new(stream)
-        .keep_alive(KeepAlive::default())
-        // Nginx'in stream'i tamponlamasını (buffering) engellemek için kritik header
-        .header("X-Accel-Buffering", "no"))
+        .keep_alive(KeepAlive::default()))
 }
